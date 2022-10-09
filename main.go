@@ -1,17 +1,28 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 	"net/http"
 )
 
+func respondWithJson(w http.ResponseWriter, statusCode int, body any) {
+	jsonBody, err := json.Marshal(body)
+	if err != nil {
+		log.Fatalf("Could not parse the response. Err: %s", err)
+	}
+	w.WriteHeader(statusCode)
+	w.Write(jsonBody)
+}
+
 // Hello world
-func Welcome(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Onboarding API")
+func welcome(w http.ResponseWriter, r *http.Request) {
+	respondWithJson(w, http.StatusOK, map[string]string{
+		"message": "Welcome to Onboarding API (PoC)",
+	})
 }
 
 func main() {
-	http.HandleFunc("/", Welcome)
+	http.HandleFunc("/", welcome)
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
