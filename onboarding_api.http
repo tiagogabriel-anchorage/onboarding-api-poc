@@ -1,0 +1,2 @@
+// Get welcoming message
+GET http://localhost:3000/
