@@ -16,9 +16,7 @@ func respondWithJson(w http.ResponseWriter, statusCode int, body any) {
 }
 
 func welcome(w http.ResponseWriter, r *http.Request) {
-	respondWithJson(w, http.StatusOK, map[string]string{
-		"message": "Welcome to Onboarding API (PoC)",
-	})
+	respondWithJson(w, http.StatusOK, WelcomeResponse{Message: "Welcome to Onboarding API (PoC)"})
 }
 
 func postCustomers(w http.ResponseWriter, r *http.Request) {
