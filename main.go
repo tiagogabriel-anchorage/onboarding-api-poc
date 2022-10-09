@@ -15,14 +15,20 @@ func respondWithJson(w http.ResponseWriter, statusCode int, body any) {
 	w.Write(jsonBody)
 }
 
-// Hello world
 func welcome(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, map[string]string{
 		"message": "Welcome to Onboarding API (PoC)",
 	})
 }
 
+func postCustomers(w http.ResponseWriter, r *http.Request) {
+	respondWithJson(w, http.StatusCreated, map[string]string{
+		"spec": "dummy",
+	})
+}
+
 func main() {
 	http.HandleFunc("/", welcome)
+	http.HandleFunc("/customers", postCustomers)
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
