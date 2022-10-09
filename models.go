@@ -15,7 +15,7 @@ type WelcomeResponse struct {
 }
 
 type NewCustomerRequest struct {
-	CustomerType string `json:"type"`
+	CustomerKind string `json:"kind"`
 	Entity       string `json:"entity"`
 }
 

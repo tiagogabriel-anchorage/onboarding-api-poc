@@ -9,6 +9,6 @@ POST http://localhost:3000/v1/customers
 // entity needs to be discussed
 
 {
-    "type": "business",
+    "kind": "business",
     "entity": "Anchorage hold"
 }

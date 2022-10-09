@@ -49,10 +49,10 @@ func postCustomers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Lets support, for now, only business and anchorage hold entity
-	if !strings.EqualFold(req.CustomerType, "business") {
+	if !strings.EqualFold(req.CustomerKind, "business") {
 		respondWithJson(w, http.StatusBadRequest, ErrorResponse{
 			Message:    "Does not support the given customer type",
-			ErrMessage: fmt.Sprintf("'%s' not supported", req.CustomerType),
+			ErrMessage: fmt.Sprintf("'%s' not supported", req.CustomerKind),
 		})
 		return
 	}
