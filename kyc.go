@@ -12,12 +12,7 @@ import (
 
 var bizSpec = KYCSpecification{
 	KYCVersion: 1,
-	KYCTemplate: []struct {
-		QuestionID string
-		AnswerType string
-		Mandatory  bool
-		DependsOn  []string
-	}{
+	KYCTemplate: []KYCTemplateEntry{
 		{
 			QuestionID: "external_id_question_1",
 			AnswerType: "text",
@@ -41,12 +36,14 @@ var bizSpec = KYCSpecification{
 
 type KYCSpecification struct {
 	KYCVersion  int
-	KYCTemplate []struct {
-		QuestionID string
-		AnswerType string
-		Mandatory  bool
-		DependsOn  []string
-	}
+	KYCTemplate []KYCTemplateEntry
+}
+
+type KYCTemplateEntry struct {
+	QuestionID string
+	AnswerType string
+	Mandatory  bool
+	DependsOn  []string
 }
 
 func getKYCSpec(kind, entity string) (KYCSpecification, error) {
@@ -67,6 +64,7 @@ var db = make(map[uuid.UUID]Customer)
 
 type Customer struct {
 	CustomerID uuid.UUID
+	KYCVersion int
 	Answers    []Answer
 }
 

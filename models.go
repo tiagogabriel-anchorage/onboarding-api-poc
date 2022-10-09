@@ -32,13 +32,13 @@ type KYCTemplateResponse struct {
 	Mandatory  bool     `json:"mandatory"`
 }
 
-func newCustomerResponse(customer Customer, kycSpec KYCSpecification) NewCustomerResponse {
+func newCustomerResponse(customer Customer, kycTemplate []KYCTemplateEntry) NewCustomerResponse {
 	res := NewCustomerResponse{
 		CustomerID: customer.CustomerID,
-		KYCVersion: kycSpec.KYCVersion,
+		KYCVersion: customer.KYCVersion,
 	}
 
-	for _, entry := range kycSpec.KYCTemplate {
+	for _, entry := range kycTemplate {
 		res.KYCTemplate = append(res.KYCTemplate, KYCTemplateResponse{
 			QuestionID: entry.QuestionID,
 			AnswerType: entry.AnswerType,

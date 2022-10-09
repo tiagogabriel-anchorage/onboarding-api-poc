@@ -59,9 +59,12 @@ func postCustomers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// if spec available, create the customer and save
-	customer := Customer{CustomerID: uuid.MustParse("878bc7da-4809-11ed-b878-0242ac120002")}
+	customer := Customer{
+		CustomerID: uuid.MustParse("878bc7da-4809-11ed-b878-0242ac120002"),
+		KYCVersion: kycSpec.KYCVersion,
+	}
 	saveKYC(customer)
 
 	// fill response from kyc spec
-	respondWithJson(w, http.StatusCreated, newCustomerResponse(customer, kycSpec))
+	respondWithJson(w, http.StatusCreated, newCustomerResponse(customer, kycSpec.KYCTemplate))
 }
