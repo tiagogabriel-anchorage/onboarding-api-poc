@@ -23,8 +23,9 @@ type NewCustomerResponse struct {
 	CustomerID  uuid.UUID `json:"customer_id"`
 	KYCVersion  int       `json:"kyc_version"`
 	KYCTemplate []struct {
-		QuestionID string `json:"question_id"`
-		AnswerType string `json:"answer_type"`
-		Answer     any    `json:"answer"`
+		QuestionID string   `json:"question_id"`
+		AnswerType string   `json:"answer_type"`
+		DependsOn  []string `json:"depends_on"`
+		Answer     any      `json:"answer"`
 	} `json:"kyc_template"`
 }
