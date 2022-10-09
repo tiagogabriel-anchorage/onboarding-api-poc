@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 )
@@ -15,12 +16,35 @@ func respondWithJson(w http.ResponseWriter, statusCode int, body any) {
 	w.Write(jsonBody)
 }
 
+func extractedJsonRequest(r *http.Request, req any) error {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		return ErrorResponse{
+			Message:    "Something wrong parsing the body.",
+			ErrMessage: err.Error(),
+		}
+	}
+
+	if err := json.Unmarshal(body, &req); err != nil {
+		return ErrorResponse{
+			Message:    "Something wrong unmarshalling body",
+			ErrMessage: err.Error(),
+		}
+	}
+
+	return nil
+}
+
 func welcome(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, WelcomeResponse{Message: "Welcome to Onboarding API (PoC)"})
 }
 
 func postCustomers(w http.ResponseWriter, r *http.Request) {
-	respondWithJson(w, http.StatusCreated, map[string]string{
-		"spec": "dummy",
-	})
+	var req NewCustomerRequest
+	if err := extractedJsonRequest(r, &req); err != nil {
+		respondWithJson(w, http.StatusBadRequest, err)
+		return
+	}
+
+	respondWithJson(w, http.StatusCreated, req)
 }

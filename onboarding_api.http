@@ -5,7 +5,10 @@ GET http://localhost:3000/
 
 // Initiate a new customer registry
 POST http://localhost:3000/v1/customers
+// type could be business or consumer, to differentiate the B2B2B from B2B2C
+// entity needs to be discussed
 
 {
-    "type": "business" // could be business or consumer, to differentiate the B2B2B from B2B2C
+    "type": "business", //
+    "entity": "Anchorage Hold"
 }
