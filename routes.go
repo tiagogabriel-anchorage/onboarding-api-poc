@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"strings"
+
+	"github.com/google/uuid"
 )
 
 func respondWithJson(w http.ResponseWriter, statusCode int, body any) {
@@ -48,22 +48,20 @@ func postCustomers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Lets support, for now, only business and anchorage hold entity
-	if !strings.EqualFold(req.CustomerKind, "business") {
+	// get kycSpec for this customer kind and entity
+	kycSpec, err := getKYCSpec(req.CustomerKind, req.Entity)
+	if err != nil {
 		respondWithJson(w, http.StatusBadRequest, ErrorResponse{
-			Message:    "Does not support the given customer type",
-			ErrMessage: fmt.Sprintf("'%s' not supported", req.CustomerKind),
+			Message:    "Field values do not match",
+			ErrMessage: err.Error(),
 		})
 		return
 	}
 
-	if !strings.EqualFold(req.Entity, "anchorage hold") {
-		respondWithJson(w, http.StatusBadRequest, ErrorResponse{
-			Message:    "Does not support the given entity",
-			ErrMessage: fmt.Sprintf("'%s' not supported for customer type", req.Entity),
-		})
-		return
-	}
+	// if spec available, create the customer and save
+	customer := Customer{CustomerID: uuid.MustParse("878bc7da-4809-11ed-b878-0242ac120002")}
+	saveKYC(customer)
 
-	respondWithJson(w, http.StatusCreated, req)
+	// fill response from kyc spec
+	respondWithJson(w, http.StatusCreated, newCustomerResponse(customer, kycSpec))
 }

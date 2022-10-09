@@ -1,19 +1,41 @@
 package main
 
 import (
+	"errors"
+	"fmt"
+	"strings"
+
 	"github.com/google/uuid"
 )
+
+// Specs
 
 var bizSpec = KYCSpecification{
 	KYCVersion: 1,
 	KYCTemplate: []struct {
 		QuestionID string
 		AnswerType string
+		Mandatory  bool
 		DependsOn  []string
 	}{
-		{QuestionID: "external_id_question_1", AnswerType: "text"},                                                           // string type
-		{QuestionID: "external_id_question_2", AnswerType: "boolean"},                                                        // true or false
-		{QuestionID: "external_id_question_3", AnswerType: "multi_selection", DependsOn: []string{"external_id_question_1"}}, // [a, b, c]
+		{
+			QuestionID: "external_id_question_1",
+			AnswerType: "text",
+			Mandatory:  true,
+			DependsOn:  []string{},
+		},
+		{
+			QuestionID: "external_id_question_2",
+			AnswerType: "boolean",
+			Mandatory:  false,
+			DependsOn:  []string{},
+		},
+		{
+			QuestionID: "external_id_question_3",
+			AnswerType: "multi_selection",
+			Mandatory:  true,
+			DependsOn:  []string{"external_id_question_1"},
+		},
 	},
 }
 
@@ -22,9 +44,26 @@ type KYCSpecification struct {
 	KYCTemplate []struct {
 		QuestionID string
 		AnswerType string
+		Mandatory  bool
 		DependsOn  []string
 	}
 }
+
+func getKYCSpec(kind, entity string) (KYCSpecification, error) {
+	if !strings.EqualFold(kind, "business") {
+		return KYCSpecification{}, errors.New(fmt.Sprintf("'%s' not supported as customer kind", kind))
+	}
+
+	if !strings.EqualFold(entity, "anchorage hold") {
+		return KYCSpecification{}, errors.New(fmt.Sprintf("'%s' not supported as entity", entity))
+	}
+
+	return bizSpec, nil
+}
+
+// Customers' answers
+
+var db = make(map[uuid.UUID]Customer)
 
 type Customer struct {
 	CustomerID uuid.UUID
@@ -34,4 +73,8 @@ type Customer struct {
 type Answer struct {
 	QuestionID string
 	Answer     any
+}
+
+func saveKYC(customer Customer) {
+	db[customer.CustomerID] = customer
 }

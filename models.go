@@ -20,12 +20,32 @@ type NewCustomerRequest struct {
 }
 
 type NewCustomerResponse struct {
-	CustomerID  uuid.UUID `json:"customer_id"`
-	KYCVersion  int       `json:"kyc_version"`
-	KYCTemplate []struct {
-		QuestionID string   `json:"question_id"`
-		AnswerType string   `json:"answer_type"`
-		DependsOn  []string `json:"depends_on"`
-		Answer     any      `json:"answer"`
-	} `json:"kyc_template"`
+	CustomerID  uuid.UUID             `json:"customer_id"`
+	KYCVersion  int                   `json:"kyc_version"`
+	KYCTemplate []KYCTemplateResponse `json:"kyc_template"`
+}
+
+type KYCTemplateResponse struct {
+	QuestionID string   `json:"question_id"`
+	AnswerType string   `json:"answer_type"`
+	DependsOn  []string `json:"depends_on"`
+	Mandatory  bool     `json:"mandatory"`
+}
+
+func newCustomerResponse(customer Customer, kycSpec KYCSpecification) NewCustomerResponse {
+	res := NewCustomerResponse{
+		CustomerID: customer.CustomerID,
+		KYCVersion: kycSpec.KYCVersion,
+	}
+
+	for _, entry := range kycSpec.KYCTemplate {
+		res.KYCTemplate = append(res.KYCTemplate, KYCTemplateResponse{
+			QuestionID: entry.QuestionID,
+			AnswerType: entry.AnswerType,
+			DependsOn:  entry.DependsOn,
+			Mandatory:  entry.Mandatory,
+		})
+	}
+
+	return res
 }
