@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -48,11 +47,11 @@ type KYCTemplateEntry struct {
 
 func getKYCSpec(kind, entity string) (KYCSpecification, error) {
 	if !strings.EqualFold(kind, "business") {
-		return KYCSpecification{}, errors.New(fmt.Sprintf("'%s' not supported as customer kind", kind))
+		return KYCSpecification{}, fmt.Errorf("'%s' not supported as customer kind", kind)
 	}
 
 	if !strings.EqualFold(entity, "anchorage hold") {
-		return KYCSpecification{}, errors.New(fmt.Sprintf("'%s' not supported as entity", entity))
+		return KYCSpecification{}, fmt.Errorf("'%s' not supported as entity", entity)
 	}
 
 	return bizSpec, nil
