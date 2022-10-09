@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func respondWithJson(w http.ResponseWriter, statusCode int, body any) {
@@ -43,6 +45,23 @@ func postCustomers(w http.ResponseWriter, r *http.Request) {
 	var req NewCustomerRequest
 	if err := extractedJsonRequest(r, &req); err != nil {
 		respondWithJson(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// Lets support, for now, only business and anchorage hold entity
+	if !strings.EqualFold(req.CustomerType, "business") {
+		respondWithJson(w, http.StatusBadRequest, ErrorResponse{
+			Message:    "Does not support the given customer type",
+			ErrMessage: fmt.Sprintf("'%s' not supported", req.CustomerType),
+		})
+		return
+	}
+
+	if !strings.EqualFold(req.Entity, "anchorage hold") {
+		respondWithJson(w, http.StatusBadRequest, ErrorResponse{
+			Message:    "Does not support the given entity",
+			ErrMessage: fmt.Sprintf("'%s' not supported for customer type", req.Entity),
+		})
 		return
 	}
 
