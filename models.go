@@ -51,6 +51,16 @@ type UpdateCustomerResponse struct {
 	Status string `json:"status"`
 }
 
+type GetCustomerResponse struct {
+	CustomerID uuid.UUID `json:"customer_id"`
+	KYCVersion int       `json:"kyc_version"`
+	KYC        []struct {
+		QuestionID string `json:"question_id"`
+		Answer     any    `json:"answer"`
+	} `json:"kyc"`
+	Status string `json:"status"`
+}
+
 func newCreateCustomerResponse(customer Customer, kycTemplate []KYCTemplateEntry) CreateCustomerResponse {
 	res := CreateCustomerResponse{
 		CustomerID: customer.CustomerID,
