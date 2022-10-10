@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 )
 
 func respondWithJson(w http.ResponseWriter, statusCode int, body any) {
@@ -67,4 +68,10 @@ func postCustomers(w http.ResponseWriter, r *http.Request) {
 
 	// fill response from kyc spec
 	respondWithJson(w, http.StatusCreated, newCustomerResponse(customer, kycSpec.KYCTemplate))
+}
+
+func putCustomer(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	respondWithJson(w, http.StatusOK, id)
 }
