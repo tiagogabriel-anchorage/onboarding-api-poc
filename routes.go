@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -112,6 +113,53 @@ func putCustomer(w http.ResponseWriter, r *http.Request) {
 		answers = append(answers, Answer{
 			QuestionID: kycEntry.QuestionID,
 			Answer:     kycEntry.Answer,
+		})
+	}
+
+	customer.SubmitAnswers(answers)
+	customer.UpdatedAt = time.Now()
+	saveKYC(customer)
+
+	respondWithJson(w, http.StatusOK, newUpdateCustomerResponse(customer))
+}
+
+func putCustomerV2(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := uuid.MustParse(vars["id"])
+
+	var req UpdateCustomerRequestV2
+	if err := extractedJsonRequest(r, &req); err != nil {
+		respondWithJson(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// get customer
+	customer, exists := customerById(id)
+	if !exists {
+		respondWithJson(w, http.StatusNotFound, ErrorResponse{
+			Message: fmt.Sprintf("The customer '%s' does not exist", id),
+		})
+		return
+	}
+
+	if customer.KYCVersion != req.KYCVersion {
+		respondWithJson(w, http.StatusBadRequest, ErrorResponse{
+			Message: "The KYC version is invalid",
+		})
+		return
+	}
+
+	/**
+	* TODO:
+	* (1) validate if field is valid for given answer
+	* (2) match the exposed question_ids to the internal ones
+	 */
+	var answers []Answer
+	for _, kycEntry := range req.KYC {
+		sepIndex := strings.Index(kycEntry, ":")
+		answers = append(answers, Answer{
+			QuestionID: kycEntry[:sepIndex],
+			Answer:     kycEntry[sepIndex+1:], // this answer should be parsed according to the answer type
 		})
 	}
 

@@ -45,6 +45,11 @@ type UpdateCustomerRequest struct {
 	} `json:"kyc"`
 }
 
+type UpdateCustomerRequestV2 struct {
+	KYCVersion int      `json:"kyc_version"`
+	KYC        []string `json:"kyc"`
+}
+
 type UpdateCustomerResponse struct {
 	ID         uuid.UUID `json:"customer_id"`
 	KYCVersion int       `json:"kyc_version"`
