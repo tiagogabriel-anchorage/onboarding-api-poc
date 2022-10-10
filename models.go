@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -24,6 +26,8 @@ type CreateCustomerResponse struct {
 	KYCVersion  int                   `json:"kyc_version"`
 	KYCTemplate []KYCTemplateResponse `json:"kyc_template"`
 	Status      string                `json:"status"`
+	CreatedAt   time.Time             `json:"created_at"`
+	UpdatedAt   time.Time             `json:"updated_at"`
 }
 
 type KYCTemplateResponse struct {
@@ -48,7 +52,9 @@ type UpdateCustomerResponse struct {
 		QuestionID string `json:"question_id"`
 		Answer     any    `json:"answer"`
 	} `json:"kyc"`
-	Status string `json:"status"`
+	Status    string    `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type GetCustomerResponse struct {
@@ -58,7 +64,9 @@ type GetCustomerResponse struct {
 		QuestionID string `json:"question_id"`
 		Answer     any    `json:"answer"`
 	} `json:"kyc"`
-	Status string `json:"status"`
+	Status    string    `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func newCreateCustomerResponse(customer Customer, kycTemplate []KYCTemplateEntry) CreateCustomerResponse {
@@ -66,6 +74,8 @@ func newCreateCustomerResponse(customer Customer, kycTemplate []KYCTemplateEntry
 		ID:         customer.ID,
 		KYCVersion: customer.KYCVersion,
 		Status:     customer.Status,
+		CreatedAt:  customer.CreatedAt,
+		UpdatedAt:  customer.UpdatedAt,
 	}
 
 	for _, entry := range kycTemplate {
@@ -85,6 +95,8 @@ func newUpdateCustomerResponse(customer Customer) UpdateCustomerResponse {
 		ID:         customer.ID,
 		KYCVersion: customer.KYCVersion,
 		Status:     customer.Status,
+		CreatedAt:  customer.CreatedAt,
+		UpdatedAt:  customer.UpdatedAt,
 	}
 
 	for _, entry := range customer.Answers {
@@ -109,6 +121,8 @@ func newGetCustomerResponse(customer Customer) GetCustomerResponse {
 			QuestionID string "json:\"question_id\""
 			Answer     any    "json:\"answer\""
 		}{},
+		CreatedAt: customer.CreatedAt,
+		UpdatedAt: customer.UpdatedAt,
 	}
 
 	for _, kycEntry := range customer.Answers {

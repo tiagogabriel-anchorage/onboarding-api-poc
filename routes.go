@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -61,10 +62,13 @@ func postCustomers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// if spec available, create the customer and save
+	now := time.Now()
 	customer := Customer{
 		ID:         uuid.MustParse("878bc7da-4809-11ed-b878-0242ac120002"),
 		KYCVersion: kycSpec.KYCVersion,
 		Status:     "DRAFT",
+		CreatedAt:  now,
+		UpdatedAt:  now,
 	}
 	saveKYC(customer)
 
@@ -112,6 +116,7 @@ func putCustomer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	customer.SubmitAnswers(answers)
+	customer.UpdatedAt = time.Now()
 	saveKYC(customer)
 
 	respondWithJson(w, http.StatusOK, newUpdateCustomerResponse(customer))

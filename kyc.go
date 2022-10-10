@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -66,6 +67,8 @@ type Customer struct {
 	KYCVersion int
 	Answers    []Answer
 	Status     string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 type Answer struct {
