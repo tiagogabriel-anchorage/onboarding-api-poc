@@ -73,13 +73,29 @@ type Answer struct {
 	Answer     any
 }
 
+func (c *Customer) SubmitAnswers(newAnswers []Answer) {
+	currentAnswers := map[string]Answer{}
+	for _, answer := range c.Answers {
+		currentAnswers[answer.QuestionID] = answer
+	}
+
+	// submit new answers (override if exists, create if new)
+	for _, answer := range newAnswers {
+		currentAnswers[answer.QuestionID] = answer
+	}
+
+	c.Answers = nil // forget about previous answers
+	// set new answers
+	for _, answer := range currentAnswers {
+		c.Answers = append(c.Answers, answer)
+	}
+}
+
 func saveKYC(customer Customer) {
 	db[customer.CustomerID] = customer
 }
 
-func customerById(id uuid.UUID) Customer {
-	if entry, exists := db[id]; exists {
-		return entry
-	}
-	return Customer{}
+func customerById(id uuid.UUID) (Customer, bool) {
+	c, exists := db[id]
+	return c, exists
 }

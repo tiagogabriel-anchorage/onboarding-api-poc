@@ -22,6 +22,6 @@ PUT http://localhost:3000/v1/customers/878bc7da-4809-11ed-b878-0242ac120002
     "kyc_version": 1,
     "kyc": [
         { "question_id": "external_id_question_1", "answer": "some answer" },
-        { "question_id": "external_id_question_3", "answer": ["a", "b"] }
+        { "question_id": "external_id_question_2", "answer": ["a", "b"] }
     ]
 }

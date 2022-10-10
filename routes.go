@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -82,7 +83,14 @@ func putCustomer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get customer
-	customer := customerById(id)
+	customer, exists := customerById(id)
+	if !exists {
+		respondWithJson(w, http.StatusNotFound, ErrorResponse{
+			Message: fmt.Sprintf("The customer '%s' does not exist", id),
+		})
+		return
+	}
+
 	if customer.KYCVersion != req.KYCVersion {
 		respondWithJson(w, http.StatusBadRequest, ErrorResponse{
 			Message: "The KYC version is invalid",
@@ -90,17 +98,21 @@ func putCustomer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// fill in answers
-	customer.Answers = nil // forget about previous answers
+	/**
+	* TODO:
+	* (1) validate if field is valid for given answer
+	* (2) match the exposed question_ids to the internal ones
+	 */
+	var answers []Answer
 	for _, kycEntry := range req.KYC {
-		customer.Answers = append(customer.Answers, Answer{
+		answers = append(answers, Answer{
 			QuestionID: kycEntry.QuestionID,
 			Answer:     kycEntry.Answer,
 		})
 	}
-	// Persist the customer
+
+	customer.SubmitAnswers(answers)
 	saveKYC(customer)
 
-	// Respond
 	respondWithJson(w, http.StatusOK, newUpdateCustomerResponse(customer))
 }
