@@ -62,7 +62,7 @@ func getKYCSpec(kind, entity string) (KYCSpecification, error) {
 var db = make(map[uuid.UUID]Customer)
 
 type Customer struct {
-	CustomerID uuid.UUID
+	ID         uuid.UUID
 	KYCVersion int
 	Answers    []Answer
 	Status     string
@@ -92,7 +92,7 @@ func (c *Customer) SubmitAnswers(newAnswers []Answer) {
 }
 
 func saveKYC(customer Customer) {
-	db[customer.CustomerID] = customer
+	db[customer.ID] = customer
 }
 
 func customerById(id uuid.UUID) (Customer, bool) {

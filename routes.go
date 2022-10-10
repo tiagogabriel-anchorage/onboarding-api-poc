@@ -62,7 +62,7 @@ func postCustomers(w http.ResponseWriter, r *http.Request) {
 
 	// if spec available, create the customer and save
 	customer := Customer{
-		CustomerID: uuid.MustParse("878bc7da-4809-11ed-b878-0242ac120002"),
+		ID:         uuid.MustParse("878bc7da-4809-11ed-b878-0242ac120002"),
 		KYCVersion: kycSpec.KYCVersion,
 		Status:     "DRAFT",
 	}
@@ -131,7 +131,7 @@ func getCustomer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res := GetCustomerResponse{
-		CustomerID: customer.CustomerID,
+		ID:         customer.ID,
 		KYCVersion: customer.KYCVersion,
 		Status:     customer.Status,
 		KYC: []struct {

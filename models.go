@@ -20,7 +20,7 @@ type CreateCustomerRequest struct {
 }
 
 type CreateCustomerResponse struct {
-	CustomerID  uuid.UUID             `json:"customer_id"`
+	ID          uuid.UUID             `json:"customer_id"`
 	KYCVersion  int                   `json:"kyc_version"`
 	KYCTemplate []KYCTemplateResponse `json:"kyc_template"`
 	Status      string                `json:"status"`
@@ -42,7 +42,7 @@ type UpdateCustomerRequest struct {
 }
 
 type UpdateCustomerResponse struct {
-	CustomerID uuid.UUID `json:"customer_id"`
+	ID         uuid.UUID `json:"customer_id"`
 	KYCVersion int       `json:"kyc_version"`
 	KYC        []struct {
 		QuestionID string `json:"question_id"`
@@ -52,7 +52,7 @@ type UpdateCustomerResponse struct {
 }
 
 type GetCustomerResponse struct {
-	CustomerID uuid.UUID `json:"customer_id"`
+	ID         uuid.UUID `json:"customer_id"`
 	KYCVersion int       `json:"kyc_version"`
 	KYC        []struct {
 		QuestionID string `json:"question_id"`
@@ -63,7 +63,7 @@ type GetCustomerResponse struct {
 
 func newCreateCustomerResponse(customer Customer, kycTemplate []KYCTemplateEntry) CreateCustomerResponse {
 	res := CreateCustomerResponse{
-		CustomerID: customer.CustomerID,
+		ID:         customer.ID,
 		KYCVersion: customer.KYCVersion,
 		Status:     customer.Status,
 	}
@@ -82,7 +82,7 @@ func newCreateCustomerResponse(customer Customer, kycTemplate []KYCTemplateEntry
 
 func newUpdateCustomerResponse(customer Customer) UpdateCustomerResponse {
 	res := UpdateCustomerResponse{
-		CustomerID: customer.CustomerID,
+		ID:         customer.ID,
 		KYCVersion: customer.KYCVersion,
 		Status:     "DRAFT",
 	}
