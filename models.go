@@ -84,7 +84,7 @@ func newUpdateCustomerResponse(customer Customer) UpdateCustomerResponse {
 	res := UpdateCustomerResponse{
 		ID:         customer.ID,
 		KYCVersion: customer.KYCVersion,
-		Status:     "DRAFT",
+		Status:     customer.Status,
 	}
 
 	for _, entry := range customer.Answers {
@@ -94,6 +94,30 @@ func newUpdateCustomerResponse(customer Customer) UpdateCustomerResponse {
 		}{
 			QuestionID: entry.QuestionID,
 			Answer:     entry.Answer,
+		})
+	}
+
+	return res
+}
+
+func newGetCustomerResponse(customer Customer) GetCustomerResponse {
+	res := GetCustomerResponse{
+		ID:         customer.ID,
+		KYCVersion: customer.KYCVersion,
+		Status:     customer.Status,
+		KYC: []struct {
+			QuestionID string "json:\"question_id\""
+			Answer     any    "json:\"answer\""
+		}{},
+	}
+
+	for _, kycEntry := range customer.Answers {
+		res.KYC = append(res.KYC, struct {
+			QuestionID string "json:\"question_id\""
+			Answer     any    "json:\"answer\""
+		}{
+			QuestionID: kycEntry.QuestionID,
+			Answer:     kycEntry.Answer,
 		})
 	}
 

@@ -130,25 +130,24 @@ func getCustomer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := GetCustomerResponse{
-		ID:         customer.ID,
-		KYCVersion: customer.KYCVersion,
-		Status:     customer.Status,
-		KYC: []struct {
-			QuestionID string "json:\"question_id\""
-			Answer     any    "json:\"answer\""
-		}{},
-	}
+	respondWithJson(w, http.StatusOK, newGetCustomerResponse(customer))
+}
 
-	for _, kycEntry := range customer.Answers {
-		res.KYC = append(res.KYC, struct {
-			QuestionID string "json:\"question_id\""
-			Answer     any    "json:\"answer\""
-		}{
-			QuestionID: kycEntry.QuestionID,
-			Answer:     kycEntry.Answer,
+func postCustomerSubmission(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := uuid.MustParse(vars["id"])
+
+	// get customer
+	customer, exists := customerById(id)
+	if !exists {
+		respondWithJson(w, http.StatusNotFound, ErrorResponse{
+			Message: fmt.Sprintf("The customer '%s' does not exist", id),
 		})
+		return
 	}
 
-	respondWithJson(w, http.StatusOK, res)
+	customer.Status = "LATEST"
+	saveKYC(customer)
+
+	respondWithJson(w, http.StatusOK, newGetCustomerResponse(customer))
 }
