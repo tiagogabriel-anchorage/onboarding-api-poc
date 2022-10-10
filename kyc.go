@@ -65,6 +65,7 @@ type Customer struct {
 	CustomerID uuid.UUID
 	KYCVersion int
 	Answers    []Answer
+	Status     string
 }
 
 type Answer struct {
@@ -74,4 +75,11 @@ type Answer struct {
 
 func saveKYC(customer Customer) {
 	db[customer.CustomerID] = customer
+}
+
+func customerById(id uuid.UUID) Customer {
+	if entry, exists := db[id]; exists {
+		return entry
+	}
+	return Customer{}
 }

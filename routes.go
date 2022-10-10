@@ -43,7 +43,7 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 }
 
 func postCustomers(w http.ResponseWriter, r *http.Request) {
-	var req NewCustomerRequest
+	var req CreateCustomerRequest
 	if err := extractedJsonRequest(r, &req); err != nil {
 		respondWithJson(w, http.StatusBadRequest, err)
 		return
@@ -63,15 +63,44 @@ func postCustomers(w http.ResponseWriter, r *http.Request) {
 	customer := Customer{
 		CustomerID: uuid.MustParse("878bc7da-4809-11ed-b878-0242ac120002"),
 		KYCVersion: kycSpec.KYCVersion,
+		Status:     "DRAFT",
 	}
 	saveKYC(customer)
 
 	// fill response from kyc spec
-	respondWithJson(w, http.StatusCreated, newCustomerResponse(customer, kycSpec.KYCTemplate))
+	respondWithJson(w, http.StatusCreated, newCreateCustomerResponse(customer, kycSpec.KYCTemplate))
 }
 
 func putCustomer(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := vars["id"]
-	respondWithJson(w, http.StatusOK, id)
+	id := uuid.MustParse(vars["id"])
+
+	var req UpdateCustomerRequest
+	if err := extractedJsonRequest(r, &req); err != nil {
+		respondWithJson(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// get customer
+	customer := customerById(id)
+	if customer.KYCVersion != req.KYCVersion {
+		respondWithJson(w, http.StatusBadRequest, ErrorResponse{
+			Message: "The KYC version is invalid",
+		})
+		return
+	}
+
+	// fill in answers
+	customer.Answers = nil // forget about previous answers
+	for _, kycEntry := range req.KYC {
+		customer.Answers = append(customer.Answers, Answer{
+			QuestionID: kycEntry.QuestionID,
+			Answer:     kycEntry.Answer,
+		})
+	}
+	// Persist the customer
+	saveKYC(customer)
+
+	// Respond
+	respondWithJson(w, http.StatusOK, newUpdateCustomerResponse(customer))
 }

@@ -14,15 +14,16 @@ type WelcomeResponse struct {
 	Message string `json:"message"`
 }
 
-type NewCustomerRequest struct {
+type CreateCustomerRequest struct {
 	CustomerKind string `json:"kind"`
 	Entity       string `json:"entity"`
 }
 
-type NewCustomerResponse struct {
+type CreateCustomerResponse struct {
 	CustomerID  uuid.UUID             `json:"customer_id"`
 	KYCVersion  int                   `json:"kyc_version"`
 	KYCTemplate []KYCTemplateResponse `json:"kyc_template"`
+	Status      string                `json:"status"`
 }
 
 type KYCTemplateResponse struct {
@@ -32,10 +33,29 @@ type KYCTemplateResponse struct {
 	Mandatory  bool     `json:"mandatory"`
 }
 
-func newCustomerResponse(customer Customer, kycTemplate []KYCTemplateEntry) NewCustomerResponse {
-	res := NewCustomerResponse{
+type UpdateCustomerRequest struct {
+	KYCVersion int `json:"kyc_version"`
+	KYC        []struct {
+		QuestionID string `json:"question_id"`
+		Answer     any    `json:"answer"`
+	} `json:"kyc"`
+}
+
+type UpdateCustomerResponse struct {
+	CustomerID uuid.UUID `json:"customer_id"`
+	KYCVersion int       `json:"kyc_version"`
+	KYC        []struct {
+		QuestionID string `json:"question_id"`
+		Answer     any    `json:"answer"`
+	} `json:"kyc"`
+	Status string `json:"status"`
+}
+
+func newCreateCustomerResponse(customer Customer, kycTemplate []KYCTemplateEntry) CreateCustomerResponse {
+	res := CreateCustomerResponse{
 		CustomerID: customer.CustomerID,
 		KYCVersion: customer.KYCVersion,
+		Status:     customer.Status,
 	}
 
 	for _, entry := range kycTemplate {
@@ -44,6 +64,26 @@ func newCustomerResponse(customer Customer, kycTemplate []KYCTemplateEntry) NewC
 			AnswerType: entry.AnswerType,
 			DependsOn:  entry.DependsOn,
 			Mandatory:  entry.Mandatory,
+		})
+	}
+
+	return res
+}
+
+func newUpdateCustomerResponse(customer Customer) UpdateCustomerResponse {
+	res := UpdateCustomerResponse{
+		CustomerID: customer.CustomerID,
+		KYCVersion: customer.KYCVersion,
+		Status:     "DRAFT",
+	}
+
+	for _, entry := range customer.Answers {
+		res.KYC = append(res.KYC, struct {
+			QuestionID string `json:"question_id"`
+			Answer     any    `json:"answer"`
+		}{
+			QuestionID: entry.QuestionID,
+			Answer:     entry.Answer,
 		})
 	}
 
