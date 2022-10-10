@@ -25,3 +25,8 @@ PUT http://localhost:3000/v1/customers/878bc7da-4809-11ed-b878-0242ac120002
         { "question_id": "external_id_question_2", "answer": ["a", "b"] }
     ]
 }
+
+###
+
+// Get the customers' kyc information
+GET http://localhost:3000/v1/customers/878bc7da-4809-11ed-b878-0242ac120002
