@@ -3,8 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -14,31 +12,18 @@ import (
 )
 
 func respondWithJson(w http.ResponseWriter, statusCode int, body any) {
-	jsonBody, err := json.Marshal(body)
-	if err != nil {
-		log.Fatalf("Could not parse the response. Err: %s", err)
-	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	w.Write(jsonBody)
+	json.NewEncoder(w).Encode(body)
 }
 
 func extractedJsonRequest(r *http.Request, req any) error {
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return ErrorResponse{
-			Message:    "Something wrong parsing the body.",
+			Message:    "Something wrong with request",
 			ErrMessage: err.Error(),
 		}
 	}
-
-	if err := json.Unmarshal(body, &req); err != nil {
-		return ErrorResponse{
-			Message:    "Something wrong unmarshalling body",
-			ErrMessage: err.Error(),
-		}
-	}
-
 	return nil
 }
 
