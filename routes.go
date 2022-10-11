@@ -18,6 +18,7 @@ func respondWithJson(w http.ResponseWriter, statusCode int, body any) {
 	if err != nil {
 		log.Fatalf("Could not parse the response. Err: %s", err)
 	}
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	w.Write(jsonBody)
 }
