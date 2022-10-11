@@ -18,6 +18,7 @@ func respondWithJson(w http.ResponseWriter, statusCode int, body any) {
 }
 
 func extractedJsonRequest(r *http.Request, req any) error {
+	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return ErrorResponse{
 			Message:    "Something wrong with request",
