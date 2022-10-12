@@ -28,8 +28,8 @@ func extractedJsonRequest(r *http.Request, req any) error {
 	return nil
 }
 
-func welcome(w http.ResponseWriter, r *http.Request) {
-	respondWithJson(w, http.StatusOK, WelcomeResponse{Message: "Welcome to Onboarding API (PoC)"})
+func welcome(in Requester) Responder {
+	return Ok(WelcomeResponse{Message: "Welcome to Onboarding API (PoC)"})
 }
 
 func postCustomers(w http.ResponseWriter, r *http.Request) {
