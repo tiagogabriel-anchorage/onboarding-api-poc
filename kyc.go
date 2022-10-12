@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// Specs
-
+// bizSpec is the KYC specification valid for a specific customer (business or consumer)
+// and for a specific market/entity: US, SG, PT, etc.
 var bizSpec = KYCSpecification{
 	KYCVersion: 1,
 	KYCTemplate: []KYCTemplateEntry{
@@ -34,11 +34,13 @@ var bizSpec = KYCSpecification{
 	},
 }
 
+// KYCSpecification is the collection of rules to be applied to a set of customers.
 type KYCSpecification struct {
 	KYCVersion  int
 	KYCTemplate []KYCTemplateEntry
 }
 
+// KYCTemplateEntry is a single KYC rule node that constitutes a specification.
 type KYCTemplateEntry struct {
 	QuestionID string
 	AnswerType string
@@ -46,6 +48,7 @@ type KYCTemplateEntry struct {
 	DependsOn  []string
 }
 
+// getKYCSpec finds a specification valid for a combination of kind of customer and market it belongs to.
 func getKYCSpec(kind, entity string) (KYCSpecification, error) {
 	if !strings.EqualFold(kind, "business") {
 		return KYCSpecification{}, fmt.Errorf("'%s' not supported as customer kind", kind)
@@ -58,10 +61,10 @@ func getKYCSpec(kind, entity string) (KYCSpecification, error) {
 	return bizSpec, nil
 }
 
-// Customers' answers
-
+// db is a memory persistence layer that saves customer's KYC information.
 var db = make(map[uuid.UUID]Customer)
 
+// Customer, from a KYC standpoint, is defined by a set of answers that match a specification.
 type Customer struct {
 	ID         uuid.UUID
 	KYCVersion int
@@ -71,11 +74,14 @@ type Customer struct {
 	UpdatedAt  time.Time
 }
 
+// Answers is the response node of the KYC form, which is defined by the specification.
 type Answer struct {
 	QuestionID string
 	Answer     any
 }
 
+// SubmitAnswers provides the customer with new KYC information. Information previously
+// set can be overridden, but never deleted, as new information gets added.
 func (c *Customer) SubmitAnswers(newAnswers []Answer) {
 	currentAnswers := map[string]Answer{}
 	for _, answer := range c.Answers {
@@ -94,11 +100,13 @@ func (c *Customer) SubmitAnswers(newAnswers []Answer) {
 	}
 }
 
+// saveKYC saves the customer KYC information.
 func saveKYC(customer Customer) {
 	db[customer.ID] = customer
 }
 
-func customerById(id uuid.UUID) (Customer, bool) {
+// customerByID finds a customer by its id.
+func customerByID(id uuid.UUID) (Customer, bool) {
 	c, exists := db[id]
 	return c, exists
 }

@@ -9,11 +9,13 @@ import (
 	"github.com/google/uuid"
 )
 
-func welcome(in Requester) Responder {
+// Welcome responds to the request to the root path.
+func Welcome(in Requester) Responder {
 	return Ok(WelcomeResponse{Message: "Welcome to Onboarding API (PoC)"})
 }
 
-func postCustomers(in Requester) Responder {
+// PostCustomer deals with the registry of a new customer KYC information.
+func PostCustomers(in Requester) Responder {
 	var req CreateCustomerRequest
 	if err := in.ExtractBody(&req); err != nil {
 		return BadRequest("Body is malformed", err)
@@ -22,7 +24,7 @@ func postCustomers(in Requester) Responder {
 	// get kycSpec for this customer kind and entity
 	kycSpec, err := getKYCSpec(req.CustomerKind, req.Entity)
 	if err != nil {
-		return BadRequest("Field values do not match", err)
+		return BadRequest("Could not find a KYC specification", err)
 	}
 
 	// if spec available, create the customer and save
@@ -39,7 +41,8 @@ func postCustomers(in Requester) Responder {
 	return Created(newCreateCustomerResponse(customer, kycSpec.KYCTemplate))
 }
 
-func putCustomer(in Requester) Responder {
+// PutCustomer submits the answers to the current KYC information of the customer.
+func PutCustomer(in Requester) Responder {
 	id, res := getCustomerID(in)
 	if res != nil {
 		return res
@@ -51,7 +54,7 @@ func putCustomer(in Requester) Responder {
 	}
 
 	// get customer
-	customer, exists := customerById(id)
+	customer, exists := customerByID(id)
 	if !exists {
 		return NotFound
 	}
@@ -81,7 +84,9 @@ func putCustomer(in Requester) Responder {
 	return Ok(newUpdateCustomerResponse(customer))
 }
 
-func putCustomerV2(in Requester) Responder {
+// PutCustomer submits the answers to the current KYC information of the customer,
+// but uses a different approach when dealing with the input data.
+func PutCustomerV2(in Requester) Responder {
 	id, res := getCustomerID(in)
 	if res != nil {
 		return res
@@ -93,7 +98,7 @@ func putCustomerV2(in Requester) Responder {
 	}
 
 	// get customer
-	customer, exists := customerById(id)
+	customer, exists := customerByID(id)
 	if !exists {
 		return NotFound
 	}
@@ -113,7 +118,7 @@ func putCustomerV2(in Requester) Responder {
 		sepIndex := strings.Index(kycEntry, ":")
 		answers = append(answers, Answer{
 			QuestionID: kycEntry[:sepIndex],
-			Answer:     kycEntry[sepIndex+1:], // this answer should be parsed according to the answer type
+			Answer:     kycEntry[sepIndex+1:], // this answer should be parsed accordingly to the answer type
 		})
 	}
 
@@ -124,14 +129,15 @@ func putCustomerV2(in Requester) Responder {
 	return Ok(newUpdateCustomerResponse(customer))
 }
 
-func getCustomer(in Requester) Responder {
+// GetCustomer retrieves the current state of the KYC for the given customer.
+func GetCustomer(in Requester) Responder {
 	id, res := getCustomerID(in)
 	if res != nil {
 		return res
 	}
 
 	// get customer
-	customer, exists := customerById(id)
+	customer, exists := customerByID(id)
 	if !exists {
 		return NotFound
 	}
@@ -139,14 +145,15 @@ func getCustomer(in Requester) Responder {
 	return Ok(newGetCustomerResponse(customer))
 }
 
-func postCustomerSubmission(in Requester) Responder {
+// PostCustomerSubmission marks the KYC information as final, therefore submitting the KYC information.
+func PostCustomerSubmission(in Requester) Responder {
 	id, res := getCustomerID(in)
 	if res != nil {
 		return res
 	}
 
 	// get customer
-	customer, exists := customerById(id)
+	customer, exists := customerByID(id)
 	if !exists {
 		return NotFound
 	}
@@ -157,6 +164,7 @@ func postCustomerSubmission(in Requester) Responder {
 	return Ok(newGetCustomerResponse(customer))
 }
 
+// getCustomerID extracts the id value from the URL path.
 func getCustomerID(in Requester) (uuid.UUID, Responder) {
 	var id uuid.UUID
 	if value, exists := in.GetParamByName("id"); exists {
