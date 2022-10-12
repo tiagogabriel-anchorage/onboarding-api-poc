@@ -122,6 +122,10 @@ func Created(body any) *response {
 	return Content(http.StatusCreated, body)
 }
 
+func BadRequest(message string, err error) *response {
+	return ErrorWithStatus(http.StatusBadRequest, message, err)
+}
+
 func handleRoute(r *mux.Router, path string, action actionFunc, httpVerbs ...string) {
 	handler := func(out http.ResponseWriter, in *http.Request) {
 		res := action(&request{in: in})

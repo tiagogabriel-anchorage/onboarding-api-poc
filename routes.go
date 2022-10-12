@@ -32,21 +32,16 @@ func welcome(in Requester) Responder {
 	return Ok(WelcomeResponse{Message: "Welcome to Onboarding API (PoC)"})
 }
 
-func postCustomers(w http.ResponseWriter, r *http.Request) {
+func postCustomers(in Requester) Responder {
 	var req CreateCustomerRequest
-	if err := extractedJsonRequest(r, &req); err != nil {
-		respondWithJson(w, http.StatusBadRequest, err)
-		return
+	if err := in.ExtractBody(&req); err != nil {
+		return BadRequest("Body is malformed", err)
 	}
 
 	// get kycSpec for this customer kind and entity
 	kycSpec, err := getKYCSpec(req.CustomerKind, req.Entity)
 	if err != nil {
-		respondWithJson(w, http.StatusBadRequest, ErrorResponse{
-			Message:    "Field values do not match",
-			ErrMessage: err.Error(),
-		})
-		return
+		return BadRequest("Field values do not match", err)
 	}
 
 	// if spec available, create the customer and save
@@ -60,8 +55,7 @@ func postCustomers(w http.ResponseWriter, r *http.Request) {
 	}
 	saveKYC(customer)
 
-	// fill response from kyc spec
-	respondWithJson(w, http.StatusCreated, newCreateCustomerResponse(customer, kycSpec.KYCTemplate))
+	return Created(newCreateCustomerResponse(customer, kycSpec.KYCTemplate))
 }
 
 func putCustomer(w http.ResponseWriter, r *http.Request) {
