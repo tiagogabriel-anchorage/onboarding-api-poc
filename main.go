@@ -17,8 +17,8 @@ func configureEndpoints(r *mux.Router) {
 	// r.HandleFunc("/", welcome)
 	handleRoute(r, "/", welcome, "GET")
 	handleRoute(r, "/v1/customers", postCustomers, "POST")
+	handleRoute(r, "/v1/customers/{id}", putCustomer, "PUT")
 
-	r.HandleFunc("/v1/customers/{id}", putCustomer).Methods("PUT")
 	r.HandleFunc("/v2/customers/{id}", putCustomerV2).Methods("PUT")
 	r.HandleFunc("/v1/customers/{id}", getCustomer).Methods("GET")
 	r.HandleFunc("/v1/customers/{id}/submit", postCustomerSubmission).Methods("POST")
