@@ -107,30 +107,32 @@ func putCustomer(in Requester) Responder {
 	return Ok(newUpdateCustomerResponse(customer))
 }
 
-func putCustomerV2(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := uuid.MustParse(vars["id"])
+func putCustomerV2(in Requester) Responder {
+	var id uuid.UUID
+	if value, exists := in.GetParamByName("id"); exists {
+		var err error
+		id, err = uuid.Parse(value)
+		if err != nil {
+			return BadRequest("Invalid id", fmt.Errorf("the id '%s' is an invalid universal identifier", value))
+		}
+	} else {
+		return BadRequest("Missing route param", errors.New("'id' is missing"))
+	}
 
 	var req UpdateCustomerRequestV2
-	if err := extractedJsonRequest(r, &req); err != nil {
-		respondWithJson(w, http.StatusBadRequest, err)
-		return
+	if err := in.ExtractBody(&req); err != nil {
+		return BadRequest("Body is malformed", err)
 	}
 
 	// get customer
 	customer, exists := customerById(id)
 	if !exists {
-		respondWithJson(w, http.StatusNotFound, ErrorResponse{
-			Message: fmt.Sprintf("The customer '%s' does not exist", id),
-		})
-		return
+		return NotFound
 	}
 
 	if customer.KYCVersion != req.KYCVersion {
-		respondWithJson(w, http.StatusBadRequest, ErrorResponse{
-			Message: "The KYC version is invalid",
-		})
-		return
+		return BadRequest("The KYC version is invalid",
+			fmt.Errorf("kyc version '%d' is invalid", req.KYCVersion))
 	}
 
 	/**
@@ -151,7 +153,7 @@ func putCustomerV2(w http.ResponseWriter, r *http.Request) {
 	customer.UpdatedAt = time.Now()
 	saveKYC(customer)
 
-	respondWithJson(w, http.StatusOK, newUpdateCustomerResponse(customer))
+	return Ok(newUpdateCustomerResponse(customer))
 }
 
 func getCustomer(w http.ResponseWriter, r *http.Request) {
