@@ -40,15 +40,9 @@ func postCustomers(in Requester) Responder {
 }
 
 func putCustomer(in Requester) Responder {
-	var id uuid.UUID
-	if value, exists := in.GetParamByName("id"); exists {
-		var err error
-		id, err = uuid.Parse(value)
-		if err != nil {
-			return BadRequest("Invalid id", fmt.Errorf("the id '%s' is an invalid universal identifier", value))
-		}
-	} else {
-		return BadRequest("Missing route param", errors.New("'id' is missing"))
+	id, res := getCustomerID(in)
+	if res != nil {
+		return res
 	}
 
 	var req UpdateCustomerRequest
@@ -88,15 +82,9 @@ func putCustomer(in Requester) Responder {
 }
 
 func putCustomerV2(in Requester) Responder {
-	var id uuid.UUID
-	if value, exists := in.GetParamByName("id"); exists {
-		var err error
-		id, err = uuid.Parse(value)
-		if err != nil {
-			return BadRequest("Invalid id", fmt.Errorf("the id '%s' is an invalid universal identifier", value))
-		}
-	} else {
-		return BadRequest("Missing route param", errors.New("'id' is missing"))
+	id, res := getCustomerID(in)
+	if res != nil {
+		return res
 	}
 
 	var req UpdateCustomerRequestV2
@@ -137,15 +125,9 @@ func putCustomerV2(in Requester) Responder {
 }
 
 func getCustomer(in Requester) Responder {
-	var id uuid.UUID
-	if value, exists := in.GetParamByName("id"); exists {
-		var err error
-		id, err = uuid.Parse(value)
-		if err != nil {
-			return BadRequest("Invalid id", fmt.Errorf("the id '%s' is an invalid universal identifier", value))
-		}
-	} else {
-		return BadRequest("Missing route param", errors.New("'id' is missing"))
+	id, res := getCustomerID(in)
+	if res != nil {
+		return res
 	}
 
 	// get customer
@@ -158,15 +140,9 @@ func getCustomer(in Requester) Responder {
 }
 
 func postCustomerSubmission(in Requester) Responder {
-	var id uuid.UUID
-	if value, exists := in.GetParamByName("id"); exists {
-		var err error
-		id, err = uuid.Parse(value)
-		if err != nil {
-			return BadRequest("Invalid id", fmt.Errorf("the id '%s' is an invalid universal identifier", value))
-		}
-	} else {
-		return BadRequest("Missing route param", errors.New("'id' is missing"))
+	id, res := getCustomerID(in)
+	if res != nil {
+		return res
 	}
 
 	// get customer
@@ -179,4 +155,18 @@ func postCustomerSubmission(in Requester) Responder {
 	saveKYC(customer)
 
 	return Ok(newGetCustomerResponse(customer))
+}
+
+func getCustomerID(in Requester) (uuid.UUID, Responder) {
+	var id uuid.UUID
+	if value, exists := in.GetParamByName("id"); exists {
+		var err error
+		id, err = uuid.Parse(value)
+		if err != nil {
+			return id, BadRequest("Invalid id", fmt.Errorf("the id '%s' is an invalid universal identifier", value))
+		}
+	} else {
+		return id, BadRequest("Missing route param", errors.New("'id' is missing"))
+	}
+	return id, nil
 }

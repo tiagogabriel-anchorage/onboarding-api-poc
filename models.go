@@ -6,12 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type ErrorResponse struct {
-	error
-	Message    string `json:"message"`
-	ErrMessage string `json:"error"`
-}
-
 type WelcomeResponse struct {
 	Message string `json:"message"`
 }

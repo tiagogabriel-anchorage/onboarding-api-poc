@@ -95,11 +95,11 @@ func Error(message string, err error) *response {
 
 func ErrorWithStatus(status int, message string, err error) *response {
 	body := struct {
-		message string
-		details string
+		Message string `json:"message"`
+		Details string `json:"details"`
 	}{
-		message: message,
-		details: err.Error(),
+		Message: message,
+		Details: err.Error(),
 	}
 	return newResponse(status, body).
 		WithHeader("Content-Type", "application/json")
