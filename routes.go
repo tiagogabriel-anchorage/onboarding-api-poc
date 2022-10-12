@@ -156,20 +156,25 @@ func putCustomerV2(in Requester) Responder {
 	return Ok(newUpdateCustomerResponse(customer))
 }
 
-func getCustomer(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := uuid.MustParse(vars["id"])
+func getCustomer(in Requester) Responder {
+	var id uuid.UUID
+	if value, exists := in.GetParamByName("id"); exists {
+		var err error
+		id, err = uuid.Parse(value)
+		if err != nil {
+			return BadRequest("Invalid id", fmt.Errorf("the id '%s' is an invalid universal identifier", value))
+		}
+	} else {
+		return BadRequest("Missing route param", errors.New("'id' is missing"))
+	}
 
 	// get customer
 	customer, exists := customerById(id)
 	if !exists {
-		respondWithJson(w, http.StatusNotFound, ErrorResponse{
-			Message: fmt.Sprintf("The customer '%s' does not exist", id),
-		})
-		return
+		return NotFound
 	}
 
-	respondWithJson(w, http.StatusOK, newGetCustomerResponse(customer))
+	return Ok(newGetCustomerResponse(customer))
 }
 
 func postCustomerSubmission(w http.ResponseWriter, r *http.Request) {
